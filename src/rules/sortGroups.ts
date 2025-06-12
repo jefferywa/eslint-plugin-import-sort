@@ -103,7 +103,6 @@ const rule: TSESLint.RuleModule<'ungrouped', [Options]> = {
               });
               if (current.length) grouped.push(current);
 
-              // Sort imports within each group according to their sortMethod
               grouped.forEach((group) => {
                 const groupConfig = getImportGroup(
                   group[0].source.value as string,
@@ -122,7 +121,6 @@ const rule: TSESLint.RuleModule<'ungrouped', [Options]> = {
                     }
                   });
                 } else {
-                  // Default to alphabetical sorting
                   group.sort((a, b) => {
                     const aPath = (a.source.value as string) || '';
                     const bPath = (b.source.value as string) || '';

@@ -120,4 +120,48 @@ import { MediumInterface } from "./medium.interface.ts";`;
     const results = await eslintWithFixFull.lintText(code);
     expect(results[0].output?.trim()).toBe(expected);
   });
+
+  it('should ignore imports when eslint-disable comment is present', async () => {
+    const eslintWithFix = new ESLint({
+      overrideConfig: {
+        languageOptions: {
+          parser: require('@typescript-eslint/parser'),
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'script',
+          },
+        },
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-length': ['error', { lengthTarget: 'from' }],
+        },
+      },
+      fix: true,
+    });
+
+    let code = `
+      /* eslint-disable import-sort/import-sort-length */
+      import { MediumInterface } from "./medium.interface.ts";
+      import { Short } from "./short.interface.ts";
+      import { LongInterface } from "./long.interface.ts";
+      /* eslint-enable import-sort/import-sort-length */
+    `;
+
+    const results = await eslintWithFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should ignore next line when eslint-disable-next-line comment is present', async () => {
+    let code = `
+      import { MediumInterface } from "./medium.interface.ts";
+      // eslint-disable-next-line import-sort/import-sort-length
+      import { Short } from "./short.interface.ts";
+      import { LongInterface } from "./long.interface.ts";
+    `;
+
+    const results = await eslintWithFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
 });

@@ -36,7 +36,36 @@ const rule: TSESLint.RuleModule<'unsorted', [Options]> = {
           (n): n is TSESTree.ImportDeclaration => n.type === 'ImportDeclaration'
         );
         if (imports.length <= 1) return;
-        const sorted = [...imports].sort((a, b) => {
+
+        const comments = sourceCode.getAllComments();
+
+        const isDisabled = comments.some(
+          (comment) =>
+            comment.type === 'Block' &&
+            comment.value.includes('eslint-disable') &&
+            (comment.value.includes('import-sort/import-sort-length') ||
+              !comment.value.includes('import-sort/'))
+        );
+
+        if (isDisabled) return;
+
+        const validImports = imports.filter((imp) => {
+          const prevToken = sourceCode.getTokenBefore(imp);
+          if (!prevToken) return true;
+
+          const prevComments = sourceCode.getCommentsBefore(prevToken);
+          return !prevComments.some(
+            (comment) =>
+              comment.type === 'Line' &&
+              comment.value.includes('eslint-disable-next-line') &&
+              (comment.value.includes('import-sort/import-sort-length') ||
+                !comment.value.includes('import-sort/'))
+          );
+        });
+
+        if (validImports.length <= 1) return;
+
+        const sorted = [...validImports].sort((a, b) => {
           if (options.lengthTarget === 'full') {
             const aFull = sourceCode.getText(a);
             const bFull = sourceCode.getText(b);
@@ -47,23 +76,28 @@ const rule: TSESLint.RuleModule<'unsorted', [Options]> = {
             return aLen - bLen;
           }
         });
+
         let isSorted = true;
-        for (let i = 0; i < imports.length; i++) {
-          if (imports[i] !== sorted[i]) {
+        for (let i = 0; i < validImports.length; i++) {
+          if (validImports[i] !== sorted[i]) {
             isSorted = false;
             break;
           }
         }
+
         if (!isSorted) {
           context.report({
-            node: imports[0],
+            node: validImports[0],
             messageId: 'unsorted',
             fix(fixer: TSESLint.RuleFixer) {
               const newText = sorted
                 .map((imp) => sourceCode.getText(imp))
                 .join('\n');
               return fixer.replaceTextRange(
-                [imports[0].range[0], imports[imports.length - 1].range[1]],
+                [
+                  validImports[0].range[0],
+                  validImports[validImports.length - 1].range[1],
+                ],
                 newText
               );
             },
