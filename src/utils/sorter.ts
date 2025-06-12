@@ -1,7 +1,7 @@
 import { TSESTree } from '@typescript-eslint/utils';
 import { TSESLint } from '@typescript-eslint/utils';
 import { ImportGroup } from '../interfaces/index';
-import { getImportGroup } from './group';
+import { getImportGroup, sortGroupsByPriority } from './group';
 
 interface SortResult {
   sortedImports: TSESTree.ImportDeclaration[];
@@ -12,17 +12,25 @@ export function sortImports(
   groups: ImportGroup[],
   sourceCode: TSESLint.SourceCode
 ): SortResult {
-  const groupMap = new Map<string, TSESTree.ImportDeclaration[]>();
+  const sortedGroups = sortGroupsByPriority(groups);
+
+  const groupMap = new Map<string, ImportGroup>();
+  sortedGroups.forEach((group) => {
+    groupMap.set(group.pattern, group);
+  });
+
+  const importGroups = new Map<string, TSESTree.ImportDeclaration[]>();
   imports.forEach((imp) => {
     const group = getImportGroup(imp.source.value as string, groups) || null;
     const key = group ? group.pattern : '__default__';
-    if (!groupMap.has(key)) groupMap.set(key, []);
-    groupMap.get(key)!.push(imp);
+    if (!importGroups.has(key)) importGroups.set(key, []);
+    importGroups.get(key)!.push(imp);
   });
 
   const sortedImports: TSESTree.ImportDeclaration[] = [];
-  groups.forEach((group) => {
-    const arr = groupMap.get(group.pattern);
+
+  sortedGroups.forEach((group) => {
+    const arr = importGroups.get(group.pattern);
     if (arr) {
       if (group.sortMethod === 'alphabetical') {
         arr.sort((a, b) => {
@@ -45,8 +53,8 @@ export function sortImports(
     }
   });
 
-  if (groupMap.get('__default__')) {
-    const defaultGroup = groupMap.get('__default__')!;
+  if (importGroups.get('__default__')) {
+    const defaultGroup = importGroups.get('__default__')!;
     defaultGroup.sort((a, b) => {
       const aPath = a.source.value as string;
       const bPath = b.source.value as string;

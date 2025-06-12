@@ -21,8 +21,12 @@ export const ruleSchema: TSESLint.RuleMetaData<MessageIds>['schema'] = [
               type: 'string',
               enum: ['from', 'full'],
             },
+            priority: {
+              type: 'number',
+              description: 'Lower number means higher priority (appears first)',
+            },
           },
-          required: ['pattern', 'sortMethod'],
+          required: ['pattern'],
         },
       },
     },

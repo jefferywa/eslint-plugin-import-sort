@@ -123,4 +123,152 @@ import { C } from "./c.ts";`;
       "Unused eslint-disable directive (no problems were reported from 'import-sort/import-sort-alphabetical')."
     );
   });
+
+  it('should handle mixed quotes in imports', async () => {
+    const code = `
+      import { A } from './a.ts';
+      import { B } from "./b.ts";
+      import { C } from './c.ts';
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should preserve quote style when autofixing', async () => {
+    let code = `
+      import { C } from './c.ts';
+      import { A } from "./a.ts";
+      import { B } from './b.ts';
+    `;
+
+    let expected = `import { A } from "./a.ts";
+import { B } from './b.ts';
+import { C } from './c.ts';`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithFix.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected);
+  });
+
+  it('should handle imports with aliases', async () => {
+    const code = `
+      import * as Utils from "./utils.ts";
+      import { Component } from "./component.ts";
+      import * as Types from "./types.ts";
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(1);
+    expect(results[0].messages[0].message).toBe(
+      'Imports are not sorted alphabetically by import path.'
+    );
+  });
+
+  it('should handle default imports', async () => {
+    const code = `
+      import B from './b';
+      import A from './a';
+      import C from './c';
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(1);
+    expect(results[0].messages[0].message).toBe(
+      'Imports are not sorted alphabetically by import path.'
+    );
+  });
+
+  it('should handle mixed import types', async () => {
+    const code = `
+      import { B } from './b';
+      import A from './a';
+      import { C } from './c';
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(1);
+    expect(results[0].messages[0].message).toBe(
+      'Imports are not sorted alphabetically by import path.'
+    );
+  });
+
+  it('should handle imports with inline comments', async () => {
+    const code = `
+      import { A } from "./a.ts"; // First import
+      import { B } from "./b.ts"; // Second import
+      import { C } from "./c.ts"; // Third import
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should handle dynamic imports', async () => {
+    const code = `
+      import("./a.ts");
+      import("./b.ts");
+      import("./c.ts");
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should handle imports with multiple named exports', async () => {
+    const code = `
+      import { A, B, C } from "./abc.ts";
+      import { D, E, F } from "./def.ts";
+      import { G, H, I } from "./ghi.ts";
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should handle imports with type imports', async () => {
+    const code = `
+      import type { A } from "./a.ts";
+      import type { B } from "./b.ts";
+      import type { C } from "./c.ts";
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should handle mixed type and value imports', async () => {
+    const code = `
+      import type { A } from "./a.ts";
+      import { B } from "./b.ts";
+      import type { C } from "./c.ts";
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should handle imports with re-exports', async () => {
+    const code = `
+      export { A } from "./a.ts";
+      export { B } from "./b.ts";
+      export { C } from "./c.ts";
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should handle imports with side effects', async () => {
+    const code = `
+      import "./a.ts";
+      import "./b.ts";
+      import "./c.ts";
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(0);
+  });
 });

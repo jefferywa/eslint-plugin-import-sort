@@ -96,6 +96,59 @@ describe('sortCombined', () => {
     );
   });
 
+  it('should handle mixed quotes in imports', async () => {
+    const code = `
+      import { LongInterface } from './long.interface.ts';
+      import { Short } from "./short.interface.ts";
+      import { MediumInterface } from './medium.interface.ts';
+
+      import { A_CONSTANT } from './a.constant.ts';
+      import { M_CONSTANT } from "./m.constant.ts";
+      import { Z_CONSTANT } from './z.constant.ts';
+
+      import { UserType } from "./user.type.ts";
+      import { ConfigType } from './config.type.ts';
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(1);
+    expect(results[0].messages[0].message).toBe(
+      'Imports are not properly sorted'
+    );
+  });
+
+  it('should preserve quote style when autofixing', async () => {
+    let code = `
+      import { LongInterface } from './long.interface.ts';
+      import { Short } from "./short.interface.ts";
+      import { MediumInterface } from './medium.interface.ts';
+
+      import { Z_CONSTANT } from './z.constant.ts';
+      import { A_CONSTANT } from "./a.constant.ts";
+      import { M_CONSTANT } from './m.constant.ts';
+
+      import { ConfigType } from "./config.type.ts";
+      import { UserType } from './user.type.ts';
+    `;
+
+    let expected = `import { LongInterface } from './long.interface.ts';
+import { Short } from "./short.interface.ts";
+import { MediumInterface } from './medium.interface.ts';
+
+import { A_CONSTANT } from "./a.constant.ts";
+import { M_CONSTANT } from './m.constant.ts';
+import { Z_CONSTANT } from './z.constant.ts';
+
+import { ConfigType } from "./config.type.ts";
+import { UserType } from './user.type.ts';`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithFix.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected);
+  });
+
   it('should report error for incorrect sorting', async () => {
     const code = `
       import { LongInterface } from "./long.interface.ts";
@@ -286,5 +339,40 @@ import { UserType } from "./user.type.ts";`;
 
     const results = await eslintWithEmptyGroups.lintText(code);
     expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should handle large number of imports with multiple groups', async () => {
+    const code = Array.from({ length: 100 }, (_, i) => {
+      const group = i % 3;
+      const suffix =
+        group === 0 ? 'interface.ts' : group === 1 ? 'constant.ts' : 'type.ts';
+      return `import { A${i} } from "./a${i}.${suffix}";`;
+    }).join('\n');
+
+    const eslint = new ESLint({
+      overrideConfig: {
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort': [
+            'error',
+            {
+              groups: [
+                { pattern: '.*\\.interface\\.ts$', priority: 1 },
+                { pattern: '.*\\.constant\\.ts$', priority: 2 },
+                { pattern: '.*\\.type\\.ts$', priority: 3 },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    const results = await eslint.lintText(code);
+    expect(results[0].messages).toHaveLength(100);
+    expect(results[0].messages[0].message).toBe(
+      'Imports are not properly sorted'
+    );
   });
 });

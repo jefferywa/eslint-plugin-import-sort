@@ -28,29 +28,26 @@ Then configure the rules you want to use under the rules section:
       {
         "groups": [
           {
-            "pattern": "*.interface.ts",
-            "order": 1,
-            "sortByLength": true,
-            "sortAlphabetically": false
+            "pattern": "^react$",
+            "priority": 1,
+            "sortMethod": "alphabetical"
           },
           {
-            "pattern": "*.constant.ts",
-            "order": 2,
-            "sortByLength": false,
-            "sortAlphabetically": true
+            "pattern": ".*\\.interface\\.ts$",
+            "priority": 2,
+            "sortMethod": "length"
           },
           {
-            "pattern": "*.type.ts",
-            "order": 3,
-            "sortByLength": true,
-            "sortAlphabetically": true
+            "pattern": ".*\\.constant\\.ts$",
+            "priority": 3,
+            "sortMethod": "alphabetical"
+          },
+          {
+            "pattern": ".*\\.type\\.ts$",
+            "priority": 4,
+            "sortMethod": "alphabetical"
           }
-        ],
-        "sortByLength": true,
-        "sortAlphabetically": true,
-        "defaultGroupOrder": 999,
-        "defaultSortByLength": true,
-        "defaultSortAlphabetically": true
+        ]
       }
     ]
   }
@@ -81,37 +78,36 @@ The rule accepts an options object with the following properties:
 
 An array of objects that define import groups. Each group has:
 
-- `pattern`: A glob pattern to match file types (e.g., "\*.interface.ts")
-- `order`: A number that determines the group's position in the sorted imports
-- `sortByLength`: (optional) Boolean that determines whether imports in this group should be sorted by length
-- `sortAlphabetically`: (optional) Boolean that determines whether imports in this group should be sorted alphabetically
-
-### Global Options
-
-- `sortByLength`: Boolean that determines whether imports should be sorted by length within their groups (default: true)
-- `sortAlphabetically`: Boolean that determines whether imports should be sorted alphabetically within their groups (default: true)
-- `defaultGroupOrder`: Number that determines the order of imports that don't match any group pattern (default: 999)
-- `defaultSortByLength`: Boolean that determines the default sorting by length for groups that don't specify it (default: true)
-- `defaultSortAlphabetically`: Boolean that determines the default alphabetical sorting for groups that don't specify it (default: true)
+- `pattern`: A glob pattern to match file types (e.g., "*.interface.ts")
+- `priority`: (optional) A number that determines the group's position in the sorted imports. Lower numbers appear first. If not specified, the group will be placed after all groups with defined priorities.
+- `sortMethod`: (optional) How to sort imports within the group:
+  - `"length"`: Sort by the length of the import path
+  - `"alphabetical"`: Sort alphabetically
+- `lengthTarget`: (optional) When using `sortMethod: "length"`, specifies what to measure:
+  - `"from"`: Only measure the import path length
+  - `"full"`: Measure the entire import statement length
 
 ## Example
 
 Before:
 
 ```typescript
-import { Component } from "./my.component";
-import { UserInterface } from "./user.interface";
-import { Constants } from "./app.constant";
-import { Utils } from "./utils.util";
+import { Utils } from "./utils.ts";
+import { UserInterface } from "./user.interface.ts";
+import { Constants } from "./app.constant.ts";
+import React from "react";
 ```
 
-After (with default configuration):
+After (with the configuration above):
 
 ```typescript
-import { UserInterface } from "./user.interface";
-import { Constants } from "./app.constant";
-import { Utils } from "./utils.util";
-import { Component } from "./my.component";
+import React from "react";
+
+import { UserInterface } from "./user.interface.ts";
+
+import { Constants } from "./app.constant.ts";
+
+import { Utils } from "./utils.ts";
 ```
 
 ## License

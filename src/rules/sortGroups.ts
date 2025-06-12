@@ -2,7 +2,7 @@ import { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
 import { ImportGroup } from '../interfaces';
 
-import { getImportGroup } from '../utils/group';
+import { getImportGroup, sortGroupsByPriority } from '../utils/group';
 
 export interface Options {
   groups: ImportGroup[];
@@ -48,13 +48,15 @@ const rule: TSESLint.RuleModule<'ungrouped', [Options]> = {
   defaultOptions: [{ groups: [] }],
   create(context: TSESLint.RuleContext<'ungrouped', [Options]>) {
     const options = context.options[0];
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
     return {
       Program(node: TSESTree.Program) {
         const imports = node.body.filter(
           (n): n is TSESTree.ImportDeclaration => n.type === 'ImportDeclaration'
         );
         if (imports.length <= 1) return;
+
+        const sortedGroups = sortGroupsByPriority(options.groups);
 
         const groupMap = new Map<string, TSESTree.ImportDeclaration[]>();
         imports.forEach((imp) => {
@@ -66,7 +68,7 @@ const rule: TSESLint.RuleModule<'ungrouped', [Options]> = {
         });
 
         const ordered: TSESTree.ImportDeclaration[] = [];
-        options.groups.forEach((group) => {
+        sortedGroups.forEach((group) => {
           const arr = groupMap.get(group.pattern);
           if (arr) ordered.push(...arr);
         });

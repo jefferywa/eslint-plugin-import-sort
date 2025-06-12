@@ -14,7 +14,7 @@ const rule: TSESLint.RuleModule<'unsorted', []> = {
   },
   defaultOptions: [],
   create(context: TSESLint.RuleContext<'unsorted', []>) {
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
     return {
       Program(node: TSESTree.Program) {
         const imports = node.body.filter(

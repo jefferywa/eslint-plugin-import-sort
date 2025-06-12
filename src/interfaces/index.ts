@@ -7,6 +7,7 @@ export interface ImportGroup {
   pattern: string;
   sortMethod?: 'length' | 'alphabetical';
   lengthTarget?: 'from' | 'full';
+  priority?: number;
 }
 
 export interface RuleOptions {

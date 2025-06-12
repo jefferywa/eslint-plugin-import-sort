@@ -30,7 +30,7 @@ const rule: TSESLint.RuleModule<'unsorted' | 'missingNewline', [RuleOptions]> =
       >
     ) {
       const options = context.options[0];
-      const sourceCode = context.getSourceCode();
+      const sourceCode = context.sourceCode;
 
       return {
         Program(node: TSESTree.Program) {

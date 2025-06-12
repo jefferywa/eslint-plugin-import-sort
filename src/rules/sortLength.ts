@@ -28,8 +28,9 @@ const rule: TSESLint.RuleModule<'unsorted', [Options]> = {
   },
   defaultOptions: [{}],
   create(context: TSESLint.RuleContext<'unsorted', [Options]>) {
-    const options = context.options[0];
-    const sourceCode = context.getSourceCode();
+    const options = context.options[0] || {};
+    const lengthTarget = options.lengthTarget || 'from';
+    const sourceCode = context.sourceCode;
     return {
       Program(node: TSESTree.Program) {
         const imports = node.body.filter(
@@ -66,7 +67,7 @@ const rule: TSESLint.RuleModule<'unsorted', [Options]> = {
         if (validImports.length <= 1) return;
 
         const sorted = [...validImports].sort((a, b) => {
-          if (options.lengthTarget === 'full') {
+          if (lengthTarget === 'full') {
             const aFull = sourceCode.getText(a);
             const bFull = sourceCode.getText(b);
             return aFull.length - bFull.length;
