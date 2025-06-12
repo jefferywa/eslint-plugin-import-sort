@@ -1,4 +1,4 @@
-import { ImportGroup } from "../interfaces/index";
+import { ImportGroup } from '../interfaces/index';
 
 export function getImportGroup(
   importPath: string,

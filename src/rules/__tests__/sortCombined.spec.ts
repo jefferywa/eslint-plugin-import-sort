@@ -1,31 +1,31 @@
-import { ESLint } from "eslint";
-import plugin from "../../index";
+import { ESLint } from 'eslint';
+import plugin from '../../index';
 
-describe("sortCombined", () => {
+describe('sortCombined', () => {
   const eslintWithFix = new ESLint({
     overrideConfig: {
       languageOptions: {
-        parser: require("@typescript-eslint/parser"),
+        parser: require('@typescript-eslint/parser'),
         parserOptions: {
           ecmaVersion: 2020,
-          sourceType: "script",
+          sourceType: 'script',
         },
       },
       plugins: {
-        "import-sort": plugin as any,
+        'import-sort': plugin as any,
       },
       rules: {
-        "import-sort/import-sort": [
-          "error",
+        'import-sort/import-sort': [
+          'error',
           {
             groups: [
               {
-                pattern: ".*\\.interface\\.ts",
-                sortMethod: "length",
+                pattern: '.*\\.interface\\.ts',
+                sortMethod: 'length',
               },
               {
-                pattern: ".*\\.constant\\.ts",
-                sortMethod: "alphabetical",
+                pattern: '.*\\.constant\\.ts',
+                sortMethod: 'alphabetical',
               },
             ],
           },
@@ -38,27 +38,27 @@ describe("sortCombined", () => {
   const eslintWithoutFix = new ESLint({
     overrideConfig: {
       languageOptions: {
-        parser: require("@typescript-eslint/parser"),
+        parser: require('@typescript-eslint/parser'),
         parserOptions: {
           ecmaVersion: 2020,
-          sourceType: "script",
+          sourceType: 'script',
         },
       },
       plugins: {
-        "import-sort": plugin as any,
+        'import-sort': plugin as any,
       },
       rules: {
-        "import-sort/import-sort": [
-          "error",
+        'import-sort/import-sort': [
+          'error',
           {
             groups: [
               {
-                pattern: ".*\\.interface\\.ts",
-                sortMethod: "length",
+                pattern: '.*\\.interface\\.ts',
+                sortMethod: 'length',
               },
               {
-                pattern: ".*\\.constant\\.ts",
-                sortMethod: "alphabetical",
+                pattern: '.*\\.constant\\.ts',
+                sortMethod: 'alphabetical',
               },
             ],
           },
@@ -67,7 +67,7 @@ describe("sortCombined", () => {
     },
   });
 
-  it("should sort imports by group and then by specified method", async () => {
+  it('should sort imports by group and then by specified method', async () => {
     const code = `
       import { Short } from "./short.interface.ts";
       import { MediumInterface } from "./medium.interface.ts";
@@ -77,14 +77,16 @@ describe("sortCombined", () => {
       import { M_CONSTANT } from "./m.constant.ts";
       import { Z_CONSTANT } from "./z.constant.ts";
     `;
+
     const results = await eslintWithoutFix.lintText(code);
+
     expect(results[0].messages).toHaveLength(1);
     expect(results[0].messages[0].message).toBe(
-      "Imports are not properly sorted"
+      'Imports are not properly sorted'
     );
   });
 
-  it("should report error for incorrect sorting", async () => {
+  it('should report error for incorrect sorting', async () => {
     const code = `
       import { LongInterface } from "./long.interface.ts";
       import { Short } from "./short.interface.ts";
@@ -94,14 +96,16 @@ describe("sortCombined", () => {
       import { A_CONSTANT } from "./a.constant.ts";
       import { M_CONSTANT } from "./m.constant.ts";
     `;
+
     const results = await eslintWithoutFix.lintText(code);
+
     expect(results[0].messages).toHaveLength(1);
     expect(results[0].messages[0].message).toBe(
-      "Imports are not properly sorted"
+      'Imports are not properly sorted'
     );
   });
 
-  it("should autofix incorrect sorting", async () => {
+  it('should autofix incorrect sorting', async () => {
     let code = `
       import { LongInterface } from "./long.interface.ts";
       import { Short } from "./short.interface.ts";
@@ -118,9 +122,70 @@ import { MediumInterface } from "./medium.interface.ts";
 import { A_CONSTANT } from "./a.constant.ts";
 import { M_CONSTANT } from "./m.constant.ts";
 import { Z_CONSTANT } from "./z.constant.ts";`;
-    code = code.replace(/^ +/gm, "");
-    expected = expected.replace(/^ +/gm, "");
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
     const results = await eslintWithFix.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected);
+  });
+
+  it('should sort imports by group and then by specified method with lengthTarget: full', async () => {
+    const eslintWithFixFull = new ESLint({
+      overrideConfig: {
+        languageOptions: {
+          parser: require('@typescript-eslint/parser'),
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'script',
+          },
+        },
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort': [
+            'error',
+            {
+              groups: [
+                {
+                  pattern: '.*\\.interface\\.ts',
+                  sortMethod: 'length',
+                  lengthTarget: 'full',
+                },
+                {
+                  pattern: '.*\\.constant\\.ts',
+                  sortMethod: 'alphabetical',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      fix: true,
+    });
+
+    let code = `
+      import { LongInterface } from "./long.interface.ts";
+      import { Short } from "./short.interface.ts";
+      import { MediumInterface } from "./medium.interface.ts";
+
+      import { Z_CONSTANT } from "./z.constant.ts";
+      import { A_CONSTANT } from "./a.constant.ts";
+      import { M_CONSTANT } from "./m.constant.ts";
+    `;
+    let expected = `import { Short } from "./short.interface.ts";
+import { LongInterface } from "./long.interface.ts";
+import { MediumInterface } from "./medium.interface.ts";
+
+import { A_CONSTANT } from "./a.constant.ts";
+import { M_CONSTANT } from "./m.constant.ts";
+import { Z_CONSTANT } from "./z.constant.ts";`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithFixFull.lintText(code);
     expect(results[0].output?.trim()).toBe(expected);
   });
 });

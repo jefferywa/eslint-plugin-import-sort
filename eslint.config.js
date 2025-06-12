@@ -1,11 +1,11 @@
 module.exports = [
   {
-    files: ["**/*.ts"],
+    files: ['**/*.ts'],
     languageOptions: {
-      parser: require("@typescript-eslint/parser"),
+      parser: require('@typescript-eslint/parser'),
       parserOptions: {
         ecmaVersion: 2020,
-        sourceType: "module",
+        sourceType: 'module',
       },
     },
     plugins: {},

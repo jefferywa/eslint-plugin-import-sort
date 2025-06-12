@@ -1,7 +1,7 @@
-import { TSESTree } from "@typescript-eslint/utils";
-import { TSESLint } from "@typescript-eslint/utils";
-import { ImportGroup } from "../interfaces/index";
-import { getImportGroup } from "./group";
+import { TSESTree } from '@typescript-eslint/utils';
+import { TSESLint } from '@typescript-eslint/utils';
+import { ImportGroup } from '../interfaces/index';
+import { getImportGroup } from './group';
 
 interface SortResult {
   sortedImports: TSESTree.ImportDeclaration[];
@@ -15,7 +15,7 @@ export function sortImports(
   const groupMap = new Map<string, TSESTree.ImportDeclaration[]>();
   imports.forEach((imp) => {
     const group = getImportGroup(imp.source.value as string, groups) || null;
-    const key = group ? group.pattern : "__default__";
+    const key = group ? group.pattern : '__default__';
     if (!groupMap.has(key)) groupMap.set(key, []);
     groupMap.get(key)!.push(imp);
   });
@@ -24,19 +24,19 @@ export function sortImports(
   groups.forEach((group) => {
     const arr = groupMap.get(group.pattern);
     if (arr) {
-      if (group.sortMethod === "alphabetical") {
+      if (group.sortMethod === 'alphabetical') {
         arr.sort((a, b) => {
           const aPath = sourceCode.getText(a).toLowerCase();
           const bPath = sourceCode.getText(b).toLowerCase();
           return aPath.localeCompare(bPath);
         });
-      } else if (group.sortMethod === "length") {
+      } else if (group.sortMethod === 'length') {
         arr.sort((a, b) => {
-          if (group.lengthTarget === "full") {
+          if (group.lengthTarget === 'full') {
             return sourceCode.getText(a).length - sourceCode.getText(b).length;
           } else {
-            const aPath = (a.source.value as string) || "";
-            const bPath = (b.source.value as string) || "";
+            const aPath = (a.source.value as string) || '';
+            const bPath = (b.source.value as string) || '';
             return aPath.length - bPath.length;
           }
         });
@@ -45,8 +45,8 @@ export function sortImports(
     }
   });
 
-  if (groupMap.get("__default__")) {
-    const defaultGroup = groupMap.get("__default__")!;
+  if (groupMap.get('__default__')) {
+    const defaultGroup = groupMap.get('__default__')!;
     defaultGroup.sort((a, b) => {
       const aPath = a.source.value as string;
       const bPath = b.source.value as string;

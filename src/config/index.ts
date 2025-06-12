@@ -1,32 +1,32 @@
-import { TSESLint } from "@typescript-eslint/utils";
-import { RuleOptions } from "../interfaces";
+import { TSESLint } from '@typescript-eslint/utils';
+import { RuleOptions } from '../interfaces';
 
-type MessageIds = "invalidImportOrder" | "missingNewlineBetweenGroups";
+type MessageIds = 'invalidImportOrder' | 'missingNewlineBetweenGroups';
 
-export const ruleSchema: TSESLint.RuleMetaData<MessageIds>["schema"] = [
+export const ruleSchema: TSESLint.RuleMetaData<MessageIds>['schema'] = [
   {
-    type: "object",
+    type: 'object',
     properties: {
       groups: {
-        type: "array",
+        type: 'array',
         items: {
-          type: "object",
+          type: 'object',
           properties: {
-            pattern: { type: "string" },
+            pattern: { type: 'string' },
             sortMethod: {
-              type: "string",
-              enum: ["length", "alphabetical"],
+              type: 'string',
+              enum: ['length', 'alphabetical'],
             },
             lengthTarget: {
-              type: "string",
-              enum: ["from", "full"],
+              type: 'string',
+              enum: ['from', 'full'],
             },
           },
-          required: ["pattern", "sortMethod"],
+          required: ['pattern', 'sortMethod'],
         },
       },
     },
-    required: ["groups"],
+    required: ['groups'],
   },
 ];
 

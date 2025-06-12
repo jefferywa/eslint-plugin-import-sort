@@ -7,7 +7,10 @@
   "scripts": {
     "build": "tsc",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
-    "lint": "eslint . --ext .ts",
+    "eslint": "eslint 'src/**/*.ts'",
+    "eslint:fix": "eslint --fix 'src/**/*.ts'",
+    "prettier": "prettier 'src/**/*.ts'",
+    "prettier:fix": "prettier --write 'src/**/*.ts'",
     "prepare": "yarn build"
   },
   "keywords": [
@@ -23,13 +26,15 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "29.5.14",
+    "@types/node": "24.0.1",
     "@typescript-eslint/eslint-plugin": "8.34.0",
     "@typescript-eslint/parser": "8.34.0",
     "eslint": "9.28.0",
+    "eslint-plugin-prettier": "^5.4.1",
     "jest": "30.0.0",
+    "prettier": "^3.5.3",
     "ts-jest": "29.4.0",
-    "typescript": "5.8.3",
-    "@types/node": "24.0.1"
+    "typescript": "5.8.3"
   },
   "author": "Vsevolod Golubinov"
 }

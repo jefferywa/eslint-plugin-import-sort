@@ -1,12 +1,12 @@
-import { TSESTree } from "@typescript-eslint/utils";
+import { TSESTree } from '@typescript-eslint/utils';
 
-export type SortMethod = "length" | "alphabetical";
-export type LengthTarget = "from" | "full";
+export type SortMethod = 'length' | 'alphabetical';
+export type LengthTarget = 'from' | 'full';
 
 export interface ImportGroup {
   pattern: string;
-  sortMethod: "length" | "alphabetical";
-  lengthTarget?: "from" | "full";
+  sortMethod?: 'length' | 'alphabetical';
+  lengthTarget?: 'from' | 'full';
 }
 
 export interface RuleOptions {
