@@ -36,9 +36,11 @@ const rule = createRule<GroupRuleOptions>({
               },
             },
             required: ['pattern'],
+            additionalProperties: false,
           },
         },
       },
+      additionalProperties: false,
     },
   ],
   defaultOptions: { groups: [] },
@@ -59,6 +61,7 @@ const rule = createRule<GroupRuleOptions>({
         ...groups,
       ];
     }
+
     const sourceCode = context.getSourceCode();
 
     return {

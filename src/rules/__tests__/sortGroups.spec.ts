@@ -21,24 +21,29 @@ describe('sortGroups', () => {
           {
             groups: [
               {
+                pattern: '^react$',
+                sortMethod: 'alphabetical',
+                priority: 1,
+              },
+              {
+                pattern: '^[a-z]',
+                sortMethod: 'alphabetical',
+                priority: 2,
+              },
+              {
                 pattern: '.*\\.interface\\.ts',
                 sortMethod: 'length',
-                priority: 2,
+                priority: 3,
               },
               {
                 pattern: '.*\\.constant\\.ts',
                 sortMethod: 'alphabetical',
-                priority: 3,
+                priority: 4,
               },
               {
                 pattern: '.*\\.type\\.ts',
                 sortMethod: 'alphabetical',
-                priority: 4,
-              },
-              {
-                pattern: '^react$',
-                sortMethod: 'alphabetical',
-                priority: 1,
+                priority: 5,
               },
             ],
           },
@@ -66,24 +71,29 @@ describe('sortGroups', () => {
           {
             groups: [
               {
+                pattern: '^react$',
+                sortMethod: 'alphabetical',
+                priority: 1,
+              },
+              {
+                pattern: '^[a-z]',
+                sortMethod: 'alphabetical',
+                priority: 2,
+              },
+              {
                 pattern: '.*\\.interface\\.ts',
                 sortMethod: 'length',
-                priority: 2,
+                priority: 3,
               },
               {
                 pattern: '.*\\.constant\\.ts',
                 sortMethod: 'alphabetical',
-                priority: 3,
+                priority: 4,
               },
               {
                 pattern: '.*\\.type\\.ts',
                 sortMethod: 'alphabetical',
-                priority: 4,
-              },
-              {
-                pattern: '^react$',
-                sortMethod: 'alphabetical',
-                priority: 1,
+                priority: 5,
               },
             ],
           },
@@ -790,7 +800,7 @@ import { UserType } from './user.type.ts';`;
   it('should handle large number of groups', async () => {
     const groups = Array.from({ length: 20 }, (_, i) => ({
       pattern: `^[${i}]`,
-      order: i + 1,
+      priority: i + 1,
     }));
 
     const code = `
@@ -855,7 +865,7 @@ import { UserType } from './user.type.ts';`;
               groups: [
                 {
                   pattern: '^[./]',
-                  order: 1,
+                  priority: 1,
                 },
               ],
             },
@@ -925,5 +935,310 @@ import { A_CONSTANT } from "./a.constant.ts";`;
 
     const results = await eslintWithExternalDeps.lintText(code);
     expect(results[0].output?.trim()).toBe(expected.trim());
+  });
+
+  it('should sort external dependencies correctly', async () => {
+    const code = `
+      import { LongInterface } from "./long.interface.ts";
+      import { Short } from "./short.interface.ts";
+      import { MediumInterface } from "./medium.interface.ts";
+
+      import { A_CONSTANT } from "./a.constant.ts";
+      import { M_CONSTANT } from "./m.constant.ts";
+      import { Z_CONSTANT } from "./z.constant.ts";
+
+      import { UserType } from "./user.type.ts";
+      import { ConfigType } from "./user.type.ts";
+
+      import { useState } from 'react';
+      import { useEffect } from 'react';
+
+      import { z } from 'zod';
+      import { a } from 'axios';
+      import { m } from 'moment';
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(1);
+    expect(results[0].messages[0].message).toBe(
+      'Imports are not grouped according to the specified patterns.'
+    );
+  });
+
+  it('should autofix external dependencies order', async () => {
+    let code = `
+      import { LongInterface } from "./long.interface.ts";
+      import { Short } from "./short.interface.ts";
+      import { MediumInterface } from "./medium.interface.ts";
+
+      import { A_CONSTANT } from "./a.constant.ts";
+      import { M_CONSTANT } from "./m.constant.ts";
+      import { Z_CONSTANT } from "./z.constant.ts";
+
+      import { UserType } from "./user.type.ts";
+      import { ConfigType } from "./user.type.ts";
+
+      import { useState, useEffect } from 'react';
+
+      import { z } from 'zod';
+      import { a } from 'axios';
+      import { m } from 'moment';
+    `;
+
+    let expected = `import { a } from 'axios';
+import { m } from 'moment';
+import { useState, useEffect } from 'react';
+import { z } from 'zod';
+
+import { LongInterface } from "./long.interface.ts";
+import { Short } from "./short.interface.ts";
+import { MediumInterface } from "./medium.interface.ts";
+
+import { A_CONSTANT } from "./a.constant.ts";
+import { M_CONSTANT } from "./m.constant.ts";
+import { Z_CONSTANT } from "./z.constant.ts";
+
+import { UserType } from "./user.type.ts";
+import { ConfigType } from "./user.type.ts";`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithFix.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected);
+  });
+
+  it('should handle mixed external and internal dependencies', async () => {
+    const code = `
+      import { z } from 'zod';
+      import { LongInterface } from "./long.interface.ts";
+      import { a } from 'axios';
+      import { Short } from "./short.interface.ts";
+      import { m } from 'moment';
+      import { MediumInterface } from "./medium.interface.ts";
+    `;
+
+    const results = await eslintWithoutFix.lintText(code);
+    expect(results[0].messages).toHaveLength(1);
+    expect(results[0].messages[0].message).toBe(
+      'Imports are not grouped according to the specified patterns.'
+    );
+  });
+
+  it('should autofix mixed external and internal dependencies', async () => {
+    let code = `
+      import { z } from 'zod';
+      import { LongInterface } from "./long.interface.ts";
+      import { a } from 'axios';
+      import { Short } from "./short.interface.ts";
+      import { m } from 'moment';
+      import { MediumInterface } from "./medium.interface.ts";
+    `;
+
+    let expected = `import { a } from 'axios';
+import { m } from 'moment';
+import { z } from 'zod';
+
+import { LongInterface } from "./long.interface.ts";
+import { Short } from "./short.interface.ts";
+import { MediumInterface } from "./medium.interface.ts";`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithFix.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected);
+  });
+
+  it('should validate configuration', async () => {
+    const validConfig = {
+      groups: [
+        {
+          pattern: '^react$',
+          sortMethod: 'alphabetical',
+          priority: 1,
+        },
+        {
+          pattern: '^[a-z]',
+          sortMethod: 'alphabetical',
+          priority: 2,
+        },
+        {
+          pattern: '.*\\.interface\\.ts',
+          sortMethod: 'length',
+          priority: 3,
+        },
+        {
+          pattern: '.*\\.constant\\.ts',
+          sortMethod: 'alphabetical',
+          priority: 4,
+        },
+        {
+          pattern: '.*\\.type\\.ts',
+          sortMethod: 'alphabetical',
+          priority: 5,
+        },
+      ],
+    };
+
+    const eslintWithValidConfig = new ESLint({
+      overrideConfig: {
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': ['error', validConfig],
+        },
+      },
+    });
+    const validResults = await eslintWithValidConfig.lintText(
+      'import { x } from "x";'
+    );
+    expect(validResults[0].messages).toHaveLength(0);
+
+    const eslintWithInvalidSortMethod = new ESLint({
+      overrideConfig: {
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': [
+            'error',
+            {
+              groups: [
+                { pattern: '^react$', sortMethod: 'invalid', priority: 1 },
+              ],
+            },
+          ],
+        },
+      },
+    });
+    await expect(
+      eslintWithInvalidSortMethod.lintText('import { x } from "x";')
+    ).rejects.toThrow();
+
+    const eslintWithInvalidLengthTarget = new ESLint({
+      overrideConfig: {
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': [
+            'error',
+            {
+              groups: [
+                {
+                  pattern: '^react$',
+                  sortMethod: 'length',
+                  lengthTarget: 'invalid',
+                  priority: 1,
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+    await expect(
+      eslintWithInvalidLengthTarget.lintText('import { x } from "x";')
+    ).rejects.toThrow();
+
+    const eslintWithInvalidPriority = new ESLint({
+      overrideConfig: {
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': [
+            'error',
+            {
+              groups: [
+                {
+                  pattern: '^react$',
+                  sortMethod: 'alphabetical',
+                  priority: '1',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+    await expect(
+      eslintWithInvalidPriority.lintText('import { x } from "x";')
+    ).rejects.toThrow();
+  });
+
+  it('should allow external dependencies to be not first if group config specifies', async () => {
+    const eslintWithCustomGroups = new ESLint({
+      overrideConfig: {
+        languageOptions: {
+          parser: require('@typescript-eslint/parser'),
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'script',
+          },
+        },
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': [
+            'error',
+            {
+              groups: [
+                {
+                  pattern: '.*\\.interface\\.ts',
+                  sortMethod: 'alphabetical',
+                  priority: 2,
+                },
+                {
+                  pattern: '^react$',
+                  sortMethod: 'alphabetical',
+                  priority: 1,
+                },
+                {
+                  pattern: '^[^./]',
+                  sortMethod: 'alphabetical',
+                  priority: 4,
+                },
+                {
+                  pattern: '.*\\.constant\\.ts',
+                  sortMethod: 'alphabetical',
+                  priority: 3,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      fix: true,
+    });
+
+    const code = `
+      import React from 'react';
+      import { a } from 'axios';
+      import { LongInterface } from "./long.interface.ts";
+      import { Z_CONSTANT } from "./z.constant.ts";
+      import { b } from 'buffer';
+      import { Short } from "./short.interface.ts";
+      import { A_CONSTANT } from "./a.constant.ts";
+    `;
+
+    const expected = `import React from 'react';
+
+import { LongInterface } from "./long.interface.ts";
+import { Short } from "./short.interface.ts";
+
+import { A_CONSTANT } from "./a.constant.ts";
+import { Z_CONSTANT } from "./z.constant.ts";
+
+import { a } from 'axios';
+import { b } from 'buffer';`;
+
+    const results = await eslintWithCustomGroups.lintText(
+      code.replace(/^ +/gm, '')
+    );
+    expect(results[0].output?.trim()).toBe(expected);
   });
 });

@@ -38,7 +38,6 @@ export function getImportGroup(
         return group;
       }
     } catch (error) {
-      // Если паттерн невалидный, пропускаем его
       continue;
     }
   }
