@@ -1,11 +1,14 @@
 {
   "name": "@jefferywa/eslint-plugin-import-sort",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "ESLint plugin for sorting imports by length, alphabetically, and by groups.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "readme": "README.md",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "readme": "README.md",
+    "repository": "https://github.com/jefferywa/eslint-plugin-import-sort.git"
   },
   "scripts": {
     "build": "tsc",
@@ -41,5 +44,6 @@
     "ts-jest": "29.4.0",
     "typescript": "5.8.3"
   },
+  "homepage": "https://github.com/jefferywa/eslint-plugin-import-sort#readme",
   "author": "Vsevolod Golubinov"
 }

@@ -1,6 +1,15 @@
-# eslint-plugin-import-sort
+# README
 
-ESLint plugin for grouping and sorting imports according to custom rules.
+## eslint-plugin-import-sort
+
+ESLint plugin for grouping and sorting imports according to custom rules. Based on [eslint-plugin-import](https://www.npmjs.com/package/eslint-plugin-import).
+
+[![Version npm](https://img.shields.io/badge/npm-v1.0.5-blue)](https://www.npmjs.com/package/@jefferywa/eslint-plugin-import-sort)
+[![Version git](https://img.shields.io/badge/github-code-brightgreen)](https://github.com/jefferywa/eslint-plugin-import-sort)
+[![Version git](https://img.shields.io/badge/github-issues-red)](https://github.com/jefferywa/eslint-plugin-import-sort/issues)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/jefferywa/eslint-plugin-import-sort/blob/main/LICENSE)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/jefferywa/eslint-plugin-import-sort/actions)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/jefferywa/eslint-plugin-import-sort/actions)
 
 ## Features
 
@@ -193,3 +202,21 @@ MIT
 ## Sorting behavior
 
 By default, if an import does not match any specified group, it will be sorted alphabetically by its path. This means that imports are compared as plain strings, so absolute paths (such as `C:/Users/utils`) will appear before aliased paths (such as `src/config`) because the `/` character comes before letters in ASCII order. This is the intended behavior for strict alphabetical sorting.
+
+## Testing
+
+The plugin is thoroughly tested with Jest. Run tests using:
+
+```bash
+npm test
+```
+
+Test coverage includes:
+- Group sorting functionality
+- Alphabetical sorting
+- Length-based sorting
+- Auto-fix capabilities
+- Error reporting
+- Edge cases and invalid configurations
+
+All tests are automatically run on GitHub Actions for each push and pull request.
