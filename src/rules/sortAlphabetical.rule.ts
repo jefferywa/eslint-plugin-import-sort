@@ -1,9 +1,5 @@
 import { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { NODE_TYPES, MESSAGES, DESCRIPTIONS, RULE_TYPE } from '../constants';
-import { createAlphabeticalSorter } from '../utils/sorter.util';
-import { formatSortedImports } from '../utils/imports.util';
-import { LengthRuleOptions } from '../interfaces';
-import { createRule } from '../utils/rule.util';
 
 const rule: TSESLint.RuleModule<'unsorted', []> = {
   meta: {

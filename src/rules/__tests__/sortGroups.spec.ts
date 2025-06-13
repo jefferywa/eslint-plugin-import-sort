@@ -1,6 +1,6 @@
 import { ESLint } from 'eslint';
 import plugin from '../../index';
-import { LENGTH_TARGET, SORT_METHOD, IMPORT_PATTERNS } from '../../constants';
+import { SORT_METHOD, IMPORT_PATTERNS } from '../../constants';
 
 describe('sortGroups', () => {
   const eslintWithFix = new ESLint({
