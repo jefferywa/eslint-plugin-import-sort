@@ -1,5 +1,6 @@
 import { ESLint } from 'eslint';
 import plugin from '../../index';
+import { LENGTH_TARGET, SORT_METHOD, IMPORT_PATTERNS } from '../../constants';
 
 describe('sortGroups', () => {
   const eslintWithFix = new ESLint({
@@ -426,19 +427,14 @@ import { A_CONSTANT } from "./a.constant.ts";`;
             {
               groups: [
                 {
-                  pattern: '^[^./]',
-                  sortMethod: 'alphabetical',
-                  priority: 2,
-                },
-                {
                   pattern: '.*\\.interface\\.ts',
-                  sortMethod: 'length',
+                  sortMethod: SORT_METHOD.LENGTH,
                   priority: 1,
                 },
                 {
                   pattern: '.*\\.constant\\.ts',
                   sortMethod: 'alphabetical',
-                  priority: 3,
+                  priority: 2,
                 },
               ],
             },
@@ -456,13 +452,78 @@ import { A_CONSTANT } from "./a.constant.ts";`;
       import lodash from "lodash";
     `;
 
-    let expected = `import { LongInterface } from "./long.interface.ts";
+    let expected = `import axios from "axios";
+import lodash from "lodash";
+import { useState } from "react";
 
-    import axios from "axios";
-    import lodash from "lodash";
-    import { useState } from "react";
-    
-    import { A_CONSTANT } from "./a.constant.ts";`;
+import { LongInterface } from "./long.interface.ts";
+
+import { A_CONSTANT } from "./a.constant.ts";`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithExternalDeps.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected.trim());
+  });
+
+  it('should correctly identify external dependencies with different patterns', async () => {
+    const eslintWithExternalDeps = new ESLint({
+      overrideConfig: {
+        languageOptions: {
+          parser: require('@typescript-eslint/parser'),
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'script',
+          },
+        },
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': [
+            'error',
+            {
+              groups: [
+                {
+                  pattern: '.*\\.interface\\.ts',
+                  sortMethod: SORT_METHOD.LENGTH,
+                  priority: 1,
+                },
+                {
+                  pattern: '.*\\.constant\\.ts',
+                  sortMethod: 'alphabetical',
+                  priority: 2,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      fix: true,
+    });
+
+    let code = `
+      import { A_CONSTANT } from "./a.constant.ts";
+      import { LongInterface } from "./long.interface.ts";
+      import axios from "axios";
+      import { useState } from "react";
+      import lodash from "lodash";
+      import { Button } from "@mui/material";
+      import { Config } from "src/config";
+      import { Utils } from "C:/Users/utils";
+    `;
+
+    let expected = `import { Button } from "@mui/material";
+import axios from "axios";
+import { Utils } from "C:/Users/utils";
+import lodash from "lodash";
+import { useState } from "react";
+import { Config } from "src/config";
+
+import { LongInterface } from "./long.interface.ts";
+
+import { A_CONSTANT } from "./a.constant.ts";`;
 
     code = code.replace(/^ +/gm, '');
     expected = expected.replace(/^ +/gm, '');
@@ -490,7 +551,7 @@ import { A_CONSTANT } from "./a.constant.ts";`;
             {
               groups: [
                 {
-                  pattern: '^[^./]',
+                  pattern: IMPORT_PATTERNS.NON_RELATIVE.toString().slice(1, -1),
                   sortMethod: 'length',
                   lengthTarget: 'from',
                   priority: 1,
@@ -555,7 +616,7 @@ import { A_CONSTANT } from "./a.constant.ts";`;
             {
               groups: [
                 {
-                  pattern: '^[^./]',
+                  pattern: IMPORT_PATTERNS.NON_RELATIVE.toString().slice(1, -1),
                   sortMethod: 'length',
                   lengthTarget: 'full',
                   priority: 1,
@@ -587,12 +648,76 @@ import { A_CONSTANT } from "./a.constant.ts";`;
     `;
 
     let expected = `import axios from "axios";
-import lodash from "lodash";
-import { useState } from "react";
+      import lodash from "lodash";
+      import { useState } from "react";
 
-import { LongInterface } from "./long.interface.ts";
+      import { LongInterface } from "./long.interface.ts";
 
-import { A_CONSTANT } from "./a.constant.ts";`;
+      import { A_CONSTANT } from "./a.constant.ts";`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithExternalDeps.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected.trim());
+  });
+
+  it('should sort external dependencies by alphabetical', async () => {
+    const eslintWithExternalDeps = new ESLint({
+      overrideConfig: {
+        languageOptions: {
+          parser: require('@typescript-eslint/parser'),
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'script',
+          },
+        },
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': [
+            'error',
+            {
+              groups: [
+                {
+                  pattern: IMPORT_PATTERNS.NON_RELATIVE.toString().slice(1, -1),
+                  sortMethod: 'alphabetical',
+                  priority: 1,
+                },
+                {
+                  pattern: '.*\\.interface\\.ts',
+                  sortMethod: 'length',
+                  priority: 2,
+                },
+                {
+                  pattern: '.*\\.constant\\.ts',
+                  sortMethod: 'alphabetical',
+                  priority: 3,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      fix: true,
+    });
+
+    let code = `
+      import { A_CONSTANT } from "./a.constant.ts";
+      import { LongInterface } from "./long.interface.ts";
+      import axios from "axios";
+      import { useState } from "react";
+      import lodash from "lodash";
+    `;
+
+    let expected = `import axios from "axios";
+    import lodash from "lodash";
+    import { useState } from "react";
+
+      import { LongInterface } from "./long.interface.ts";
+
+      import { A_CONSTANT } from "./a.constant.ts";`;
 
     code = code.replace(/^ +/gm, '');
     expected = expected.replace(/^ +/gm, '');
@@ -741,5 +866,64 @@ import { UserType } from './user.type.ts';`;
 
     const results = await eslint.lintText(code);
     expect(results[0].messages).toHaveLength(0);
+  });
+
+  it('should place external dependencies at the top when no priority is specified', async () => {
+    const eslintWithExternalDeps = new ESLint({
+      overrideConfig: {
+        languageOptions: {
+          parser: require('@typescript-eslint/parser'),
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'script',
+          },
+        },
+        plugins: {
+          'import-sort': plugin as any,
+        },
+        rules: {
+          'import-sort/import-sort-groups': [
+            'error',
+            {
+              groups: [
+                {
+                  pattern: '.*\\.interface\\.ts',
+                  sortMethod: SORT_METHOD.LENGTH,
+                  priority: 1,
+                },
+                {
+                  pattern: '.*\\.constant\\.ts',
+                  sortMethod: 'alphabetical',
+                  priority: 2,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      fix: true,
+    });
+
+    let code = `
+      import { A_CONSTANT } from "./a.constant.ts";
+      import { LongInterface } from "./long.interface.ts";
+      import { useState } from "react";
+      import lodash from "lodash";
+      import axios from "axios";
+    `;
+
+    let expected = `import axios from "axios";
+import lodash from "lodash";
+import { useState } from "react";
+
+import { LongInterface } from "./long.interface.ts";
+
+import { A_CONSTANT } from "./a.constant.ts";`;
+
+    code = code.replace(/^ +/gm, '');
+    expected = expected.replace(/^ +/gm, '');
+
+    const results = await eslintWithExternalDeps.lintText(code);
+    expect(results[0].output?.trim()).toBe(expected.trim());
   });
 });

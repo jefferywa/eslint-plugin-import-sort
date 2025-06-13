@@ -1,7 +1,7 @@
-import sortCombined from './rules/sortCombined';
-import sortLength from './rules/sortLength';
-import sortAlphabetical from './rules/sortAlphabetical';
-import sortGroups from './rules/sortGroups';
+import sortCombined from './rules/sortCombined.rule';
+import sortLength from './rules/sortLength.rule';
+import sortAlphabetical from './rules/sortAlphabetical.rule';
+import sortGroups from './rules/sortGroups.rule';
 
 export default {
   rules: {

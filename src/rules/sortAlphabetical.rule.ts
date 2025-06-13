@@ -1,15 +1,20 @@
 import { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { NODE_TYPES, MESSAGES, DESCRIPTIONS, RULE_TYPE } from '../constants';
+import { createAlphabeticalSorter } from '../utils/sorter.util';
+import { formatSortedImports } from '../utils/imports.util';
+import { LengthRuleOptions } from '../interfaces';
+import { createRule } from '../utils/rule.util';
 
 const rule: TSESLint.RuleModule<'unsorted', []> = {
   meta: {
-    type: 'suggestion',
+    type: RULE_TYPE,
     docs: {
-      description: 'Sort imports alphabetically by import path.',
+      description: DESCRIPTIONS.ALPHABETICAL,
     },
     fixable: 'code',
     schema: [],
     messages: {
-      unsorted: 'Imports are not sorted alphabetically by import path.',
+      unsorted: MESSAGES.UNSORTED_ALPHABETICAL,
     },
   },
   defaultOptions: [],
@@ -19,7 +24,7 @@ const rule: TSESLint.RuleModule<'unsorted', []> = {
       Program(node: TSESTree.Program) {
         const imports = node.body.filter(
           (n: TSESTree.Node): n is TSESTree.ImportDeclaration =>
-            n.type === 'ImportDeclaration'
+            n.type === NODE_TYPES.IMPORT_DECLARATION
         );
 
         if (imports.length <= 1) return;

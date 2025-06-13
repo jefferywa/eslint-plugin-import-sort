@@ -22,7 +22,6 @@ export function sortGroupsByPriority(groups: ImportGroup[]): ImportGroup[] {
     return pa - pb;
   });
 }
-
 export function getImportGroup(
   importPath: string,
   groups: ImportGroup[]

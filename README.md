@@ -113,3 +113,7 @@ import { Utils } from "./utils.ts";
 ## License
 
 MIT
+
+## Sorting behavior
+
+By default, if an import does not match any specified group, it will be sorted alphabetically by its path. This means that imports are compared as plain strings, so absolute paths (such as `C:/Users/utils`) will appear before aliased paths (such as `src/config`) because the `/` character comes before letters in ASCII order. This is the intended behavior for strict alphabetical sorting.

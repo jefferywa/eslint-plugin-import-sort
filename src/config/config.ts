@@ -1,7 +1,6 @@
 import { TSESLint } from '@typescript-eslint/utils';
 import { RuleOptions } from '../interfaces';
-
-type MessageIds = 'invalidImportOrder' | 'missingNewlineBetweenGroups';
+import { MessageIds } from '../interfaces/messages.interface';
 
 export const ruleSchema: TSESLint.RuleMetaData<MessageIds>['schema'] = [
   {
