@@ -1,6 +1,6 @@
 {
   "name": "@jefferywa/eslint-plugin-import-sort",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "ESLint plugin for sorting imports by length, alphabetically, and by groups.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

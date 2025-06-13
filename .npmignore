@@ -9,4 +9,4 @@ tsconfig.json
 jest.config.js
 .eslintrc*
 .gitignore
-.npmignore 
+.npmignore
