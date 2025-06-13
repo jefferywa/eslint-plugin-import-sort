@@ -1,0 +1,3 @@
+yarn run prettier:fix
+yarn run eslint:fix
+git add .

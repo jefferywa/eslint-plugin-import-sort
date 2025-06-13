@@ -2,6 +2,8 @@ node_modules/
 
 lib/
 
+.husky/_/
+
 .DS_Store
 .idea
 .vscode
