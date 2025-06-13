@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-import-sort",
+  "name": "@jefferywa/eslint-plugin-import-sort",
   "version": "1.0.0",
   "description": "ESLint plugin for sorting imports by length, alphabetically, and by groups.",
   "main": "lib/index.js",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/jefferywa/eslint-plugin-import-sort"
+    "url": "git+ssh://git@github.com/jefferywa/eslint-plugin-import-sort.git"
   },
   "license": "MIT",
   "devDependencies": {
